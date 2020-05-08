@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator/check");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const User = require("../model/user");
 
@@ -33,7 +34,7 @@ module.exports = {
 					msg: "User Already Exists",
 				});
 			}
-			//Creating new user instances
+
 			const user = new User({
 				firstName,
 				lastName,
@@ -47,6 +48,69 @@ module.exports = {
 
 			await user.save(); // Saving new user to mongodb User collection
 			res.status(200).json({ success: true, msg: "Successfully Registered" });
+		} catch (error) {
+			res.status(500).json("server error");
+		}
+	},
+
+	/**
+	 * @description The incoming user POST request for signin
+	 * @param {Object} req - which includes email,password.
+	 * @param {Object} res - The respnose that send backs for each request.
+	 */
+
+	postSignin: async (req, res) => {
+		// validations
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			return res.status(400).json({
+				success: false,
+				errors: errors.array(),
+			});
+		}
+
+		const { email, password } = req.body;
+
+		try {
+			// Checking for the user
+			let user = await User.findOne({
+				email,
+			});
+			if (!user) {
+				return res.status(400).json({
+					success: false,
+					msg: "User Doesn't Exists",
+				});
+			}
+
+			const passwordMatch = await bcrypt.compare(password, user.password);
+			if (!passwordMatch) {
+				return res.status(400).json({
+					success: false,
+					msg: "Incorrect password",
+				});
+			}
+
+			const payload = {
+				user: {
+					id: user.id,
+				},
+			};
+
+			jwt.sign(
+				payload,
+				"secret",
+				{
+					expiresIn: 5000,
+				},
+				(err, token) => {
+					if (err) throw err;
+					res.status(200).json({
+						success: "true",
+						token,
+					});
+				}
+			);
 		} catch (error) {
 			res.status(500).json("server error");
 		}

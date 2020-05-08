@@ -4,7 +4,17 @@ Content-Type: application/json
 {
 	"firstName" : "Firstname",
 	"lastName" : "LastName",
-	"email": "tedst@gmail.com",
+	"email": "tester@gmail.com",
 	"password" : "123456",
 	"dob" : "11-02-1993"
+}
+
+###
+
+POST http://localhost:3000/user/signin HTTP/1.1
+Content-Type: application/json
+
+{
+	"email":"tester@gmail.com",
+	"password":"123456"
 }

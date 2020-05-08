@@ -20,4 +20,16 @@ router.post(
 	userController.postAddUser
 );
 
+// /user/signin => POST
+router.post(
+	"/signin",
+	[
+		check("email", "Please Enter a Valid email").isEmail(),
+		check("password", "Please Enter a Valid password").isLength({
+			min: 6,
+		}),
+	],
+	userController.postSignin
+);
+
 module.exports = router;
