@@ -2,6 +2,7 @@ const express = require("express");
 const { check } = require("express-validator/check");
 
 const userController = require("../controller/user");
+const auth = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -31,5 +32,8 @@ router.post(
 	],
 	userController.postSignin
 );
+
+// To get the logged user By passing the jwt token
+router.get("/me", auth, userController.getLoggedUser);
 
 module.exports = router;
